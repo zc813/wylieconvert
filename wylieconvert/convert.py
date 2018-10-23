@@ -29,30 +29,27 @@ def batch_convert(mode='u2w'):
     in_path.mkdir(exist_ok=True)
     out_path.mkdir(exist_ok=True)
 
-    if not list(in_path.glob('*.txt')):
+    if len(list(in_path.glob('*.txt'))) == 0:
         exit(print('There are no .txt files to convert'))
 
     # conversion
-    to_convert = in_path.glob('*.txt')
-    if mode == 'u2w':
-        for f in to_convert:
-            content = f.read_text(encoding='utf-8-sig')
-            converted = unicode2wylie(content)
-            new = out_path / f.name
-            new.write_text(converted)
-    elif mode == 'w2u':
-        for f in to_convert:
-            content = f.read_text(encoding='utf-8-sig')
-            converted = wylie2unicode(content)
-            new = out_path / f.name
-            new.write_text(converted)
+    to_convert = list(in_path.glob('*.txt'))
+    arg = ['-u'] if mode == 'u2w' else []
+
+    current = os.getcwd()
+    os.chdir('Lingua-BO-Wylie/bin/')
+    for f in to_convert:
+        in_file = str(Path.resolve(Path.cwd() / '..' / '..' / f))
+        out_file = str(Path.resolve(Path.cwd() / '..' / '..' / str(out_path / f.name)))
+        Popen(['perl', 'wylie.pl'] + arg + [in_file, out_file])
+    os.chdir(current)
 
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print('requires a single argument:\n"u2w" for unicode2wylie\n"w2u" for wylie2unicode')
     mode = sys.argv[1]
-    if mode is not 'u2w' and mode is not 'w2u':
+    if mode != 'u2w' and mode != 'w2u':
         print('argument should be:\n"u2w" for unicode2wylie\n"w2u" for wylie2unicode')
     else:
         batch_convert(mode)
