@@ -97,3 +97,7 @@ ENV/
 # Pycharm
 .idea/
 .idea/workspace.xml
+
+.input/
+.output/
+S
