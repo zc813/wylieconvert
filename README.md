@@ -1,4 +1,4 @@
-# Convert to and from wylie from Python
+# Convert to and from wylie with Python
 
 This is a very thin wrapper on the Perl converter found on [THL website](http://www.thlib.org/cgi-bin/thl/lbow/wylie.pl).
 
