@@ -1,10 +1,24 @@
 from subprocess import Popen, PIPE
 import os
-import sys
 from pathlib import Path
+
+# Limitation:
+# wylie2unicode and unicode2wylie both send the string to be transcoded as the commandline argument Perl receives.
+# As such, strings should not be higher than the limit allowed for command-line arguments.
+# For Windows:  according to https://stackoverflow.com/a/14177376
+#               2047 or 8191 characters
+# For Posix:    according to https://stackoverflow.com/a/14176172
+#               2097152 (my output of "getconf ARG_MAX")
 
 
 def wylie2unicode(text, dir='Lingua-BO-Wylie'):
+    """
+    Transcodes a wylie string in unicode (See above limitation)
+
+    :param text: to be transcoded
+    :param dir: path to the dir containing the Perl project
+    :return: the converted string
+    """
     current = os.getcwd()
     os.chdir(dir)
     out = Popen(['perl', 'wylie2unicode.pl', text], shell=False, stdout=PIPE)
@@ -14,6 +28,13 @@ def wylie2unicode(text, dir='Lingua-BO-Wylie'):
 
 
 def unicode2wylie(text, dir='Lingua-BO-Wylie'):
+    """
+    Transcodes a unicode string in wylie (See above limitation)
+
+    :param text: to be transcoded
+    :param dir: path to the dir containing the Perl Project
+    :return: the converted string
+    """
     current = os.getcwd()
     os.chdir(dir)
     out = Popen(['perl', '-CA', 'unicode2wylie.pl', text], shell=False, stdout=PIPE)
@@ -23,6 +44,14 @@ def unicode2wylie(text, dir='Lingua-BO-Wylie'):
 
 
 def batch_convert(mode, include_orig):
+    """
+    Wrapper to Lingua-BO-Wylie/bin/wylie.pl
+
+    Reads .txt files in input/ and writes transcoded files in /output
+    all arguments are exposed except the orig/transcoded separator
+    :param mode: wylie2unicode or unicode2wylie
+    :param include_orig: includes the original string in the output if True
+    """
     # setting the folders
     in_path = Path('input')
     out_path = Path('output')
@@ -31,6 +60,8 @@ def batch_convert(mode, include_orig):
 
     if len(list(in_path.glob('*.txt'))) == 0:
         exit(print('There are no .txt files to convert'))
+    if mode != 'u2w' and mode != 'w2u':
+        exit(print('accepted modes are u2w and w2u'))
 
     # conversion
     to_convert = list(in_path.glob('*.txt'))
@@ -39,28 +70,13 @@ def batch_convert(mode, include_orig):
         args.append('-u')
     if include_orig:
         args.append('-r')
-        args.append('\n\t')
+        args.append('\n\t')  # hardcoded separator between the transcoded and the original
 
     current = os.getcwd()
     os.chdir('Lingua-BO-Wylie/bin/')
     for f in to_convert:
         in_file = str(Path.resolve(Path.cwd() / '..' / '..' / f))
         out_file = str(Path.resolve(Path.cwd() / '..' / '..' / str(out_path / f.name)))
-        Popen(['perl', 'wylie.pl', '-r', '\n\t'] + args + [in_file, out_file])
+        Path(out_file).write_text('')  # create the output file
+        Popen(['perl', 'wylie.pl'] + args + [in_file, out_file])
     os.chdir(current)
-
-
-if __name__ == '__main__':
-    if 2 > len(sys.argv) > 3:
-        print('requires the following:\n"u2w" for unicode2wylie\n"w2u" for wylie2unicode\n\noptional:'
-              '\n"true" to include the original string')
-    mode = sys.argv[1]
-    include_orig = False
-
-    if mode != 'u2w' and mode != 'w2u':
-        print('argument should be:\n"u2w" for unicode2wylie\n"w2u" for wylie2unicode'
-              '\n"true" to include the original string')
-    else:
-        if len(sys.argv) == 3 and sys.argv[2] == 'true':
-            include_orig = True
-        batch_convert(mode, include_orig=include_orig)
