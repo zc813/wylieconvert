@@ -10,7 +10,7 @@ The size limitation on the website(1Mb max) are lifted.
     
     **_Limitation:_**
      
-    wylie2unicode and unicode2wylie both send the string to be transcoded as the commandline argument Perl receives.
+    `wylie2unicode` and `unicode2wylie` both send the string to be transcoded as the commandline argument Perl receives.
     As such, strings should not be higher than the limit allowed for command-line arguments.
     
     For Windows: as seen [here](https://stackoverflow.com/a/14177376), 2047 or 8191 characters.
