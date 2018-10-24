@@ -29,6 +29,10 @@ The folders are created if missing on the first run of the script.
     
     Ex: `python3 batch_converter.py u2w` will convert all .txt files from unicode to wylie, not including the original.
 
+# Requirement
+
+Python >= 3.5 (uses pathlib methods not supported below that version)
+
 # Licence
 
 The [downloadable zip](http://www.digitaltibetan.org/tibetan/Lingua-BO-Wylie-dev.zip) does not contain any information about licence nor states the author.
