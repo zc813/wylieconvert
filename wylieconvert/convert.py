@@ -72,11 +72,11 @@ def batch_convert(mode, include_orig):
         args.append('-r')
         args.append('\n\t')  # hardcoded separator between the transcoded and the original
 
-    current = os.getcwd()
-    os.chdir('Lingua-BO-Wylie/bin/')
+    current = Path(__file__).parent
+    os.chdir(str(current)+'/Lingua-BO-Wylie/bin/')
     for f in to_convert:
-        in_file = str(Path.resolve(Path.cwd() / '..' / '..' / f))
-        out_file = str(Path.resolve(Path.cwd() / '..' / '..' / str(out_path / f.name)))
+        in_file = str(Path.resolve(Path.cwd() / '..' / '..' / '..' / f))
+        out_file = str(Path.resolve(Path.cwd() / '..' / '..' / '..' / str(out_path / f.name)))
         Path(out_file).write_text('')  # create the output file
         Popen(['perl', 'wylie.pl'] + args + [in_file, out_file])
     os.chdir(current)
